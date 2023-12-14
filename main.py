@@ -27,31 +27,31 @@ def get_weather_data(city_name):
         print(f"Error fetching weather data for {city_name}: {response.status_code}")
         return None
 
-def sky_condition(weather_data,humidity):
-  if humidity in range(40,60) and weather_data["temp"] in range(15,25):
-    if weather_data["wind"] < 15 and weather_data["clouds"] < 10:
+def sky_condition(weather_data,humidity,temp,wind,clouds):
+  if humidity in range(40,60) and temp in range(15,25):
+    if wind < 15 and clouds < 10:
       return "Cotton candy clouds have vanished, leaving behind a canvas of pure, unblemished blue." # clear blue sky
-    elif weather_data["wind"] < 15 and weather_data["clouds"] < 60:
-      return "Nice and bright, with a few clouds." if weather_data["clouds"] < 30 else "Not all sunshine, but still bright." # mostly sunny and partly cloudy
+    elif wind < 15 and clouds < 60:
+      return "Nice and bright, with a few clouds." if clouds < 30 else "Not all sunshine, but still bright." # mostly sunny and partly cloudy
     else:
-      return "Windy day. Leaves flying, clouds scooting." if weather_data["wind"] >= 15 else "Cloudy today. Sky's in a gray mood." # windy and cloudy
+      return "Windy day. Leaves flying, clouds scooting." if wind >= 15 else "Cloudy today. Sky's in a gray mood." # windy and cloudy
   else:
     if humidity >= 60:
       return "The world seems to sweat under the oppressive weight of the humidity." # humid
-    elif weather_data["temp"] <= 15:
+    elif temp <= 15:
       return "Cold enought to make a polar bear shiver."                     # cold
-    elif weather_data["temp"] >= 25:
+    elif temp >= 25:
       return "Today temperature remind me of how hot Andy Blossom is."       # hot
     else:
       return "It's hard to say what the weather will be like cause mother Nature's playing roulette with the weather today.\n You should dress for every season, just in case xD. "
 
-def format_weather_report(weather_data):
+def weather_report(weather_data):
     # Extract weather information
     description = weather_data["weather"][0]["description"]
     temp = round(weather_data["main"]["temp"] - 273.15, 2)
     humidity = weather_data["main"]["humidity"] 
-
-    # Check if sunrise_time is valid before using it
+    wind = weather_data["wind"]["speed"]
+    clouds = weather_data["clouds"]["all"]
     if isinstance(weather_data["sys"]["sunrise"], int):
         sunrise_time = datetime.fromtimestamp(weather_data["sys"]["sunrise"]).strftime("%H:%M")
     else:
@@ -67,7 +67,7 @@ def format_weather_report(weather_data):
     report += f"Wind: Speed {weather_data['wind']['speed']} m/s, direction {weather_data['wind']['deg']} degrees.\n"
     report += f"Clouds: {weather_data['clouds']['all']}%.\n"
     report += f"The official sunrise time in {city_name} is {sunrise_time}. Sunset is expected at {sunset_time}.\n"  
-    report += f"{sky_condition(weather_data,humidity)}."
+    report += f"{sky_condition(weather_data,humidity,temp,wind,clouds)}."
     return report
 
 
@@ -77,6 +77,6 @@ city_name = input("Enter the city you'd like the weather report for: ")
 # Get weather data and format report
 weather_data = get_weather_data(city_name)
 if weather_data:
-    print(format_weather_report(weather_data))
+    print(weather_report(weather_data))
 else:
     print("Sorry, I couldn't find weather data for that city.")
